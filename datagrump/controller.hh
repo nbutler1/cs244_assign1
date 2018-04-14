@@ -11,11 +11,9 @@ private:
   bool debug_; /* Enables debugging output */
 
   /* Add member variables here */
+  float  win_size;
+  uint64_t ackno;
 
-  /* Window size, measured in datagrams. (Original was 75.) */
-  unsigned int window_size_ = 100;
-
-  uint64_t delay_threshold_ms_ = 100;
 
 public:
   /* Public interface for the congestion controller */
