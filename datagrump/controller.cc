@@ -29,10 +29,6 @@ void Controller::datagram_was_sent( const uint64_t sequence_number,
 				    const bool after_timeout
 				    /* datagram was sent because of a timeout */ )
 {
-  /* Default: take no action */
-  if ( after_timeout && window_size_ > 1 ) {
-    window_size_ /= 2;
-  }
 
   if ( debug_ ) {
     cerr << "At time " << send_timestamp
@@ -50,7 +46,13 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 			       const uint64_t timestamp_ack_received )
                                /* when the ack was received (by sender) */
 {
-  window_size_ += 1;
+  // These appear to be measured in milliseconds.
+  uint64_t delay = timestamp_ack_received - send_timestamp_acked;
+  if ( delay > delay_threshold_ms_ ) {
+    window_size_ = 50;
+  } else {
+    window_size_ = 500;
+  }
 
   if ( debug_ ) {
     cerr << "At time " << timestamp_ack_received
