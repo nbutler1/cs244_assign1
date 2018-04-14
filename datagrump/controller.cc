@@ -13,15 +13,12 @@ Controller::Controller( const bool debug )
 /* Get current window size, in datagrams */
 unsigned int Controller::window_size()
 {
-  /* Default: fixed window size of 100 outstanding datagrams */
-  unsigned int the_window_size = 75;
-
   if ( debug_ ) {
     cerr << "At time " << timestamp_ms()
-	 << " window size is " << the_window_size << endl;
+	 << " window size is " << window_size_ << endl;
   }
 
-  return the_window_size;
+  return window_size_;
 }
 
 /* A datagram was sent */
@@ -33,6 +30,9 @@ void Controller::datagram_was_sent( const uint64_t sequence_number,
 				    /* datagram was sent because of a timeout */ )
 {
   /* Default: take no action */
+  if ( after_timeout && window_size_ > 1 ) {
+    window_size_ /= 2;
+  }
 
   if ( debug_ ) {
     cerr << "At time " << send_timestamp
@@ -50,7 +50,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 			       const uint64_t timestamp_ack_received )
                                /* when the ack was received (by sender) */
 {
-  /* Default: take no action */
+  window_size_ += 1;
 
   if ( debug_ ) {
     cerr << "At time " << timestamp_ack_received
