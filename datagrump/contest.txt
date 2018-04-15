@@ -1,0 +1,54 @@
+AIMD
+- fixed Walter's impl to make it work better
+
+Contest
+- Idea: predict range, like Sprout
+- AIMD bounces between 50% and dropping packets
+- So start with AIMD and:
+  - decrease division (2 -> 1.5)
+  - add delay trigger
+- Results: Great delay, 1Mbps throughput
+- Decision: need more aggressive rampup
+- Increase by 2/wsize rather than 1/wsize
+- Results: 2Mbps throughput, good delay. Better!
+- Try 4/wsize increase
+- Results: 95% utilization (4.5 Mbps) but 1.7sec 95-percentile delay
+- Try 3/wsize increase
+- Results: 44% utilization (2.2) and 246ms 95-percentile delay. 9.2 power score!
+  - Seems like sometimes our throughput just stays flat when the network gets
+    more capacity. Why?
+  - Why aren't we ramping up aggressively when the network gets more
+    capacity? The delay is very low, so the trigger can't be firing.
+- Try 3.25/wsize increase
+- Results: 80% utilization (4.1 Mbps) and 1.2sec 95-perc delay.
+  - Too aggressive.
+  - Seems like rampdowns weren't aggressive enough?
+  - Seems like in the first half, we don't ramp up. But in the second half,
+    we aggressively use all of the capacity at the expense of delay. In the
+    middle, the capacity of the network drops to 0 temporarily.
+- Try bringing our threshold down to 500ms and target decrease to 40%.
+  - 3.6 Mbps (72%), 750ms 95-perc. Power score about 5.
+- Idea: with big window sizes, our additive increase might be overwhelming
+  our threshold decrease?
+- Bugfix: we were relying on two different clocks to calculate delay! Use
+  roundtrip time instead.
+- Bugfix: our window size was going below 1, and to infinity.
+- Now we have very aggressive rampup! Let's focus on reducing delay.
+  - e.g. 98% util (4.9 Mbit/s), 800ms 95-perc delay) (power score 6)
+- Reduce both bounds to 100ms delay
+  - 4.35 Mbit/s (86% util), 170ms 95-perc delay (power score 26!!)
+- Reduce to 80ms delay
+  - 3.8 Mbit/s (76% util), 150ms 95-perc delay (power score 26.30!)
+- Increase rampup to 3.35/wsize increase
+  - Same as before basically. Slightly less power.
+  - Feels like we could use more aggressive rampup?
+- Increase rampup to 3.75/wsize increase, just to see what happens.
+  - Same as before basically. Slightly less power.
+- Try delay thresh 100 -> 50ms for funsies.
+  - Throughput went through the floor. Bad.
+- Try delay thresh to 70ms.
+  - 3.31Mbps (66% util), 127ms 95-perc delay (power score 26)
+- Try .6 for our threshold trigger, 4/wsize for rampup
+  - 3.65Mbps (72% util), 140ms 95-perc delay (power score 26.26)
+- Reduce retransmission timeout to 200ms
+  - 2.76Mbps (75% util), 123ms 95-perc delay (power score 30.57!!)
