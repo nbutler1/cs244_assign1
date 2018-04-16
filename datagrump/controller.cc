@@ -59,7 +59,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
   if(window_size_ < 1)
       window_size_ = 1;
   if(delay < 80) {
-    window_size_ += (4/ floor(window_size_));
+    window_size_ += (3.75/ floor(window_size_));
   }
   if ( debug_ ) {
     cerr << "At time " << timestamp_ack_received
