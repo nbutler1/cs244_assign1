@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cmath>
 
 #include "controller.hh"
 #include "timestamp.hh"
@@ -18,7 +19,7 @@ unsigned int Controller::window_size()
 	 << " window size is " << window_size_ << endl;
   }
 
-  return window_size_;
+  return (unsigned int)floor(window_size_);
 }
 
 /* A datagram was sent */
@@ -50,7 +51,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 			       const uint64_t timestamp_ack_received )
                                /* when the ack was received (by sender) */
 {
-  window_size_ += 1;
+  window_size_ += (1 / floor(window_size_));
 
   if ( debug_ ) {
     cerr << "At time " << timestamp_ack_received

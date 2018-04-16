@@ -13,7 +13,7 @@ private:
   /* Add member variables here */
 
   /* Window size, measured in datagrams. (Original was 75.) */
-  unsigned int window_size_ = 1;
+  float window_size_ = 1;
 
 public:
   /* Public interface for the congestion controller */
